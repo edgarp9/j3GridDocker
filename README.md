@@ -7,6 +7,9 @@ It provides a lightweight workspace where top-level application windows can be
 dropped into regions, resized with splitters, moved between tabs, hidden with
 inactive tabs, and restored when they are undocked.
 
+<img width="803" height="587" alt="j3GridDocker" src="https://github.com/user-attachments/assets/549a9c45-2e34-4aa5-899b-74bcf39d8182" />
+
+
 ## GitHub Description
 
 Tabbed Windows desktop window docker with splitter-based layouts and external
