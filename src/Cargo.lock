@@ -441,7 +441,7 @@ dependencies = [
 
 [[package]]
 name = "j3grid-docker"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "gdk4-x11",
  "gtk4",

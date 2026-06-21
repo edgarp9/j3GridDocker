@@ -1267,20 +1267,6 @@ pub(super) const fn window_maximize_restore_menu_label(
     }
 }
 
-#[cfg(test)]
-pub(super) fn about_dialog_text(language: UiLanguage) -> String {
-    match language {
-        UiLanguage::English => format!(
-            "j3GridDocker {}\n\nhttps://github.com/edgarp9",
-            env!("CARGO_PKG_VERSION")
-        ),
-        UiLanguage::Korean => format!(
-            "j3GridDocker {}\n\nhttps://github.com/edgarp9",
-            env!("CARGO_PKG_VERSION")
-        ),
-    }
-}
-
 pub(super) fn write_region_title_text(
     output: &mut String,
     language: UiLanguage,

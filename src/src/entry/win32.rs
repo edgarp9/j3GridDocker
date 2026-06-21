@@ -20,9 +20,9 @@ use windows_sys::Win32::Foundation::{
 };
 use windows_sys::Win32::Graphics::Gdi::{
     BeginPaint, COLOR_WINDOW, ClientToScreen, CreateRectRgn, DEFAULT_GUI_FONT, DT_CENTER, DT_LEFT,
-    DeleteObject, EndPaint, GetMonitorInfoW, GetStockObject, GetSysColorBrush, HDC, HGDIOBJ,
-    InvalidateRect, MONITOR_DEFAULTTONEAREST, MONITORINFO, MonitorFromWindow, PAINTSTRUCT,
-    SetBkMode, SetWindowRgn, TRANSPARENT, UpdateWindow,
+    DeleteObject, EndPaint, GetMonitorInfoW, GetStockObject, GetSysColor, GetSysColorBrush, HDC,
+    HGDIOBJ, InvalidateRect, MONITOR_DEFAULTTONEAREST, MONITORINFO, MonitorFromWindow, OPAQUE,
+    PAINTSTRUCT, SetBkColor, SetBkMode, SetWindowRgn, TRANSPARENT, UpdateWindow,
 };
 use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows_sys::Win32::UI::Controls::{
@@ -36,23 +36,24 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
     AppendMenuW, BS_DEFPUSHBUTTON, BS_PUSHBUTTON, CREATESTRUCTW, CS_DBLCLKS, CS_HREDRAW,
     CS_VREDRAW, CW_USEDEFAULT, CreateMenu, CreatePopupMenu, CreateWindowExW, DefWindowProcW,
     DestroyIcon, DestroyMenu, DestroyWindow, DispatchMessageW, DrawMenuBar, ES_AUTOHSCROLL,
-    EnumWindows, GA_ROOT, GW_HWNDPREV, GW_OWNER, GWL_STYLE, GWLP_USERDATA, GetAncestor,
-    GetClientRect, GetCursorPos, GetMenu, GetMessageW, GetWindow, GetWindowLongPtrW, GetWindowRect,
-    GetWindowTextLengthW, GetWindowTextW, GetWindowThreadProcessId, HICON, HMENU, HTCAPTION,
-    ICON_BIG, ICON_SMALL, IMAGE_ICON, IsWindow, IsWindowVisible, IsZoomed, KillTimer,
-    LR_LOADFROMFILE, LoadCursorW, LoadImageW, MB_ICONINFORMATION, MB_OK, MF_CHECKED, MF_GRAYED,
-    MF_POPUP, MF_SEPARATOR, MF_STRING, MF_UNCHECKED, MSG, MessageBoxW, PostMessageW,
-    PostQuitMessage, RegisterClassW, SIZE_MINIMIZED, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, SW_RESTORE,
-    SW_SHOW, SW_SHOWNORMAL, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER,
-    SWP_SHOWWINDOW, SendMessageW, SetMenu, SetTimer, SetWindowLongPtrW, SetWindowPos,
-    SetWindowTextW, ShowWindow, TPM_RETURNCMD, TPM_RIGHTBUTTON, TrackPopupMenu, TranslateMessage,
-    WM_ACTIVATE, WM_APP, WM_CANCELMODE, WM_CAPTURECHANGED, WM_CLOSE, WM_COMMAND, WM_CREATE,
-    WM_CTLCOLORSTATIC, WM_DESTROY, WM_ERASEBKGND, WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDBLCLK,
-    WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MOUSEMOVE, WM_MOVE, WM_NCCREATE, WM_NCDESTROY,
-    WM_NCLBUTTONDOWN, WM_NOTIFY, WM_PAINT, WM_RBUTTONUP, WM_SETCURSOR, WM_SETFONT, WM_SETICON,
-    WM_SIZE, WM_TIMER, WM_WINDOWPOSCHANGED, WNDCLASSW, WS_BORDER, WS_CAPTION, WS_CHILD,
-    WS_EX_DLGMODALFRAME, WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_EX_WINDOWEDGE, WS_OVERLAPPEDWINDOW,
-    WS_POPUP, WS_SYSMENU, WS_TABSTOP, WS_THICKFRAME, WS_VISIBLE, WindowFromPoint,
+    ES_AUTOVSCROLL, ES_LEFT, ES_MULTILINE, ES_READONLY, EnumWindows, GA_ROOT, GW_HWNDPREV,
+    GW_OWNER, GWL_STYLE, GWLP_USERDATA, GetAncestor, GetClientRect, GetCursorPos, GetMenu,
+    GetMessageW, GetWindow, GetWindowLongPtrW, GetWindowRect, GetWindowTextLengthW, GetWindowTextW,
+    GetWindowThreadProcessId, HICON, HMENU, HTCAPTION, ICON_BIG, ICON_SMALL, IMAGE_ICON, IsWindow,
+    IsWindowVisible, IsZoomed, KillTimer, LR_LOADFROMFILE, LoadCursorW, LoadImageW,
+    MB_ICONINFORMATION, MB_OK, MF_CHECKED, MF_GRAYED, MF_POPUP, MF_SEPARATOR, MF_STRING,
+    MF_UNCHECKED, MSG, MessageBoxW, PostMessageW, PostQuitMessage, RegisterClassW, SIZE_MINIMIZED,
+    SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, SW_RESTORE, SW_SHOW, SW_SHOWNORMAL, SWP_FRAMECHANGED,
+    SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageW, SetMenu,
+    SetTimer, SetWindowLongPtrW, SetWindowPos, SetWindowTextW, ShowWindow, TPM_RETURNCMD,
+    TPM_RIGHTBUTTON, TrackPopupMenu, TranslateMessage, WM_ACTIVATE, WM_APP, WM_CANCELMODE,
+    WM_CAPTURECHANGED, WM_CLOSE, WM_COMMAND, WM_CREATE, WM_CTLCOLORSTATIC, WM_DESTROY,
+    WM_ERASEBKGND, WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDBLCLK, WM_LBUTTONDOWN, WM_LBUTTONUP,
+    WM_MOUSEMOVE, WM_MOVE, WM_NCCREATE, WM_NCDESTROY, WM_NCLBUTTONDOWN, WM_NOTIFY, WM_PAINT,
+    WM_RBUTTONUP, WM_SETCURSOR, WM_SETFONT, WM_SETICON, WM_SIZE, WM_TIMER, WM_WINDOWPOSCHANGED,
+    WNDCLASSW, WS_BORDER, WS_CAPTION, WS_CHILD, WS_EX_CLIENTEDGE, WS_EX_DLGMODALFRAME,
+    WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_EX_WINDOWEDGE, WS_HSCROLL, WS_OVERLAPPEDWINDOW,
+    WS_POPUP, WS_SYSMENU, WS_TABSTOP, WS_THICKFRAME, WS_VISIBLE, WS_VSCROLL, WindowFromPoint,
 };
 
 type HWinEventHook = *mut core::ffi::c_void;
@@ -136,6 +137,8 @@ use crate::infra::{
 mod gdi;
 #[path = "i18n.rs"]
 mod i18n;
+#[path = "license_notices.rs"]
+mod license_notices;
 #[path = "program_edit_dialog.rs"]
 mod program_edit_dialog;
 #[path = "shutdown.rs"]
@@ -162,10 +165,13 @@ use i18n::{
 };
 #[cfg(test)]
 use i18n::{
-    about_dialog_text, close_other_tabs_status_text, docked_window_selection_status_text,
+    close_other_tabs_status_text, docked_window_selection_status_text,
     drop_registration_error_status_text, switch_tab_failure_status_text,
     switch_tab_success_status_text, tab_deletion_error_status_text, tab_deletion_status_text,
     tab_reorder_status_text,
+};
+use license_notices::{
+    PROJECT_URL, about_notice_text, about_version_label_text, about_window_title_text,
 };
 use program_edit_dialog::prompt_tab_preset_edit;
 #[cfg(test)]
@@ -195,7 +201,6 @@ const TEXT_INPUT_DIALOG_CLASS_NAME: &str = "j3GridDocker.TextInputDialog";
 const ABOUT_DIALOG_CLASS_NAME: &str = "j3GridDocker.AboutDialog";
 const SPLITTER_OVERLAY_CLASS_NAME: &str = "j3GridDocker.SplitterOverlay";
 const WINDOW_TITLE: &str = "j3GridDocker";
-const ABOUT_LINK_URL: &str = "https://github.com/edgarp9";
 const APP_ICON_RESOURCE_ID: usize = 1;
 const DEFAULT_WIDTH: i32 = 900;
 const DEFAULT_HEIGHT: i32 = 700;
@@ -221,10 +226,12 @@ const WM_TAB_PRESET_PROGRAM_WINDOW_EVENT: u32 = WM_APP + 4;
 const DROP_WINDOW_MOVE_THRESHOLD: i32 = 4;
 const SPLITTER_HIT_TOLERANCE: i32 = 5;
 const MAX_WINDOW_TEXT_CHARS: usize = 32_767;
-const ABOUT_DIALOG_WIDTH: i32 = 360;
-const ABOUT_DIALOG_HEIGHT: i32 = 170;
+const ABOUT_DIALOG_WIDTH: i32 = 540;
+const ABOUT_DIALOG_HEIGHT: i32 = 360;
 const ABOUT_DIALOG_OK_ID: u16 = 1;
 const ABOUT_DIALOG_LINK_ID: u16 = 2;
+const ABOUT_DIALOG_TEXT_ID: u16 = 4;
+const EM_SETLIMITTEXT: u32 = 0x00C5;
 
 // WinEventProc has no per-hook user data, so keep the required process-global
 // route private to the DropMoveEventHook owner.
@@ -8840,22 +8847,39 @@ impl TextInputDialogState {
 
 struct AboutDialogState {
     language: UiLanguage,
-    version: Vec<u16>,
+    version_label: Vec<u16>,
+    body: Vec<u16>,
     link_markup: Vec<u16>,
     ok_label: Vec<u16>,
+    text_hwnd: HWND,
     done: bool,
 }
 
 impl AboutDialogState {
     fn new(language: UiLanguage) -> Self {
+        let body = normalize_win32_multiline_text(&about_notice_text(language));
         Self {
             language,
-            version: wide_null(&format!("j3GridDocker {}", env!("CARGO_PKG_VERSION"))),
+            version_label: wide_null(&about_version_label_text()),
+            body: wide_null(&body),
             link_markup: wide_null(&about_dialog_link_markup()),
             ok_label: wide_null(ui_text(language, "OK", "확인")),
+            text_hwnd: null_mut(),
             done: false,
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AboutStaticControlPaintMode {
+    Transparent,
+    OpaqueWindowBackground,
+}
+
+fn normalize_win32_multiline_text(text: &str) -> String {
+    text.replace("\r\n", "\n")
+        .replace('\r', "\n")
+        .replace('\n', "\r\n")
 }
 
 unsafe extern "system" fn about_dialog_proc(
@@ -8912,10 +8936,8 @@ unsafe extern "system" fn about_dialog_proc(
         }
         WM_CTLCOLORSTATIC => {
             let hdc = wparam as HDC;
-            unsafe {
-                SetBkMode(hdc, TRANSPARENT as i32);
-                GetSysColorBrush(COLOR_WINDOW) as LRESULT
-            }
+            let control = lparam as HWND;
+            about_static_control_color_result(state, hdc, control)
         }
         WM_CLOSE => {
             if !state.is_null() {
@@ -8941,17 +8963,18 @@ unsafe extern "system" fn about_dialog_proc(
 fn create_about_dialog_controls(hwnd: HWND, state: *mut AboutDialogState) -> bool {
     set_dialog_font(hwnd);
     let static_class = wide_null("STATIC");
+    let edit_class = wide_null("EDIT");
     let button_class = wide_null("BUTTON");
 
-    let version = unsafe {
+    let version_label = unsafe {
         CreateWindowExW(
             0,
             static_class.as_ptr(),
-            (*state).version.as_ptr(),
+            (*state).version_label.as_ptr(),
             WS_CHILD | WS_VISIBLE,
             20,
-            20,
-            300,
+            16,
+            500,
             22,
             hwnd,
             null_mut(),
@@ -8959,10 +8982,47 @@ fn create_about_dialog_controls(hwnd: HWND, state: *mut AboutDialogState) -> boo
             null_mut(),
         )
     };
-    if version.is_null() {
+    if version_label.is_null() {
         return false;
     }
-    set_dialog_font(version);
+    set_dialog_font(version_label);
+
+    let body = unsafe {
+        CreateWindowExW(
+            WS_EX_CLIENTEDGE,
+            edit_class.as_ptr(),
+            null(),
+            WS_CHILD
+                | WS_VISIBLE
+                | WS_TABSTOP
+                | WS_VSCROLL
+                | WS_HSCROLL
+                | ES_LEFT as u32
+                | ES_MULTILINE as u32
+                | ES_READONLY as u32
+                | ES_AUTOVSCROLL as u32
+                | ES_AUTOHSCROLL as u32,
+            20,
+            48,
+            500,
+            222,
+            hwnd,
+            control_id(ABOUT_DIALOG_TEXT_ID),
+            null_mut(),
+            null_mut(),
+        )
+    };
+    if body.is_null() {
+        return false;
+    }
+    unsafe {
+        (*state).text_hwnd = body;
+    }
+    set_dialog_font(body);
+    unsafe {
+        SendMessageW(body, EM_SETLIMITTEXT, (*state).body.len(), 0);
+        SetWindowTextW(body, (*state).body.as_ptr());
+    }
 
     let mut link = unsafe {
         CreateWindowExW(
@@ -8971,8 +9031,8 @@ fn create_about_dialog_controls(hwnd: HWND, state: *mut AboutDialogState) -> boo
             (*state).link_markup.as_ptr(),
             WS_CHILD | WS_VISIBLE | WS_TABSTOP,
             20,
-            54,
-            300,
+            288,
+            310,
             26,
             hwnd,
             null_mut(),
@@ -8981,7 +9041,7 @@ fn create_about_dialog_controls(hwnd: HWND, state: *mut AboutDialogState) -> boo
         )
     };
     if link.is_null() {
-        let link_label = wide_null(ABOUT_LINK_URL);
+        let link_label = wide_null(PROJECT_URL);
         link = unsafe {
             CreateWindowExW(
                 0,
@@ -8989,8 +9049,8 @@ fn create_about_dialog_controls(hwnd: HWND, state: *mut AboutDialogState) -> boo
                 link_label.as_ptr(),
                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON as u32,
                 20,
-                54,
-                300,
+                288,
+                310,
                 26,
                 hwnd,
                 control_id(ABOUT_DIALOG_LINK_ID),
@@ -9010,8 +9070,8 @@ fn create_about_dialog_controls(hwnd: HWND, state: *mut AboutDialogState) -> boo
             button_class.as_ptr(),
             (*state).ok_label.as_ptr(),
             WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON as u32,
-            256,
-            96,
+            442,
+            288,
             78,
             26,
             hwnd,
@@ -9031,6 +9091,39 @@ fn create_about_dialog_controls(hwnd: HWND, state: *mut AboutDialogState) -> boo
     true
 }
 
+fn about_static_control_color_result(
+    state: *mut AboutDialogState,
+    hdc: HDC,
+    control: HWND,
+) -> LRESULT {
+    let text_hwnd = if state.is_null() {
+        null_mut()
+    } else {
+        unsafe { (*state).text_hwnd }
+    };
+    match about_static_control_paint_mode(control, text_hwnd) {
+        AboutStaticControlPaintMode::Transparent => unsafe {
+            SetBkMode(hdc, TRANSPARENT as i32);
+            GetSysColorBrush(COLOR_WINDOW) as LRESULT
+        },
+        AboutStaticControlPaintMode::OpaqueWindowBackground => unsafe {
+            SetBkMode(hdc, OPAQUE as i32);
+            SetBkColor(hdc, GetSysColor(COLOR_WINDOW));
+            GetSysColorBrush(COLOR_WINDOW) as LRESULT
+        },
+    }
+}
+
+fn about_static_control_paint_mode(control: HWND, text_hwnd: HWND) -> AboutStaticControlPaintMode {
+    // A read-only EDIT sends WM_CTLCOLORSTATIC. It must not inherit the
+    // transparent label paint mode, otherwise scroll repaint leaves old glyphs.
+    if !text_hwnd.is_null() && control == text_hwnd {
+        AboutStaticControlPaintMode::OpaqueWindowBackground
+    } else {
+        AboutStaticControlPaintMode::Transparent
+    }
+}
+
 fn handle_about_dialog_notify(hwnd: HWND, state: *mut AboutDialogState, lparam: LPARAM) {
     if !about_dialog_link_activated(lparam) {
         return;
@@ -9040,17 +9133,13 @@ fn handle_about_dialog_notify(hwnd: HWND, state: *mut AboutDialogState, lparam: 
 }
 
 fn open_about_link_from_dialog(hwnd: HWND, state: *mut AboutDialogState) {
-    if let Err(last_error) = open_url_in_browser(hwnd, ABOUT_LINK_URL) {
+    if let Err(last_error) = open_url_in_browser(hwnd, PROJECT_URL) {
         let message = wide_null(ui_text(
             unsafe { (*state).language },
             "Could not open the link in a browser.",
             "브라우저에서 링크를 열 수 없습니다.",
         ));
-        let title = wide_null(ui_text(
-            unsafe { (*state).language },
-            "About j3GridDocker",
-            "j3GridDocker 정보",
-        ));
+        let title = wide_null(&about_window_title_text());
         let _ = last_error;
         unsafe {
             MessageBoxW(
@@ -9097,7 +9186,7 @@ fn shell_execute_succeeded(result: HINSTANCE) -> bool {
 }
 
 fn about_dialog_link_markup() -> String {
-    format!(r#"<a href="{ABOUT_LINK_URL}">{ABOUT_LINK_URL}</a>"#)
+    format!(r#"<a href="{PROJECT_URL}">{PROJECT_URL}</a>"#)
 }
 
 fn close_about_dialog(hwnd: HWND, state: *mut AboutDialogState) {
@@ -9661,7 +9750,7 @@ fn show_about_dialog(owner: HWND, language: UiLanguage) -> Result<(), Win32Statu
     let _ = init_about_link_control();
 
     let class_name = wide_null(ABOUT_DIALOG_CLASS_NAME);
-    let title = wide_null(ui_text(language, "About j3GridDocker", "j3GridDocker 정보"));
+    let title = wide_null(&about_window_title_text());
     let (x, y) = centered_window_position(owner, ABOUT_DIALOG_WIDTH, ABOUT_DIALOG_HEIGHT);
     let mut state = Box::new(AboutDialogState::new(language));
     let state_ptr = state.as_mut() as *mut AboutDialogState;
@@ -11228,15 +11317,48 @@ mod tests {
     }
 
     #[test]
-    fn about_dialog_text_includes_package_version() {
-        let text = about_dialog_text(UiLanguage::English);
+    fn about_dialog_uses_embedded_text_and_package_version_label() {
+        let text = about_notice_text(UiLanguage::English);
 
         assert!(text.contains("j3GridDocker"));
-        assert!(text.contains(env!("CARGO_PKG_VERSION")));
-        assert!(text.contains("https://github.com/edgarp9"));
+        assert!(text.contains("GPL-3.0-or-later"));
+        assert!(text.contains("LICENSE"));
+        assert!(text.contains("Source Code"));
+        assert!(text.contains(PROJECT_URL));
+        assert_eq!(
+            about_version_label_text(),
+            format!("j3GridDocker {}", env!("CARGO_PKG_VERSION"))
+        );
         assert_eq!(
             about_dialog_link_markup(),
-            r#"<a href="https://github.com/edgarp9">https://github.com/edgarp9</a>"#
+            format!(r#"<a href="{PROJECT_URL}">{PROJECT_URL}</a>"#)
+        );
+    }
+
+    #[test]
+    fn about_dialog_readonly_edit_uses_opaque_background_for_scroll_repaint() {
+        let text = test_hwnd(1);
+        let label = test_hwnd(2);
+
+        assert_eq!(
+            about_static_control_paint_mode(text, text),
+            AboutStaticControlPaintMode::OpaqueWindowBackground
+        );
+        assert_eq!(
+            about_static_control_paint_mode(label, text),
+            AboutStaticControlPaintMode::Transparent
+        );
+        assert_eq!(
+            about_static_control_paint_mode(text, null_mut()),
+            AboutStaticControlPaintMode::Transparent
+        );
+    }
+
+    #[test]
+    fn win32_multiline_text_newlines_are_normalized_to_crlf() {
+        assert_eq!(
+            normalize_win32_multiline_text("a\nb\r\nc\rd"),
+            "a\r\nb\r\nc\r\nd"
         );
     }
 

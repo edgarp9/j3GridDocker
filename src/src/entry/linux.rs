@@ -28,9 +28,14 @@ use crate::infra::{
     SettingsFileStore,
 };
 
+#[path = "license_notices.rs"]
+mod license_notices;
 #[path = "shutdown.rs"]
 mod shutdown;
 
+use license_notices::{
+    PROJECT_URL, about_notice_text, about_version_label_text, about_window_title_text,
+};
 use shutdown::{
     SettingsSavePolicy, ShutdownAttemptReport, ShutdownMode, ShutdownSettingsSaveError,
     ShutdownSettingsSaver, log_undock_failures, shutdown_report_after_settings_save,
@@ -39,7 +44,8 @@ use shutdown::{
 
 const APPLICATION_ID: &str = "io.github.j3soon.j3griddocker";
 const WINDOW_TITLE: &str = "j3GridDocker";
-const ABOUT_LINK_URL: &str = "https://github.com/edgarp9";
+const ABOUT_DIALOG_DEFAULT_WIDTH: i32 = 540;
+const ABOUT_DIALOG_DEFAULT_HEIGHT: i32 = 360;
 const DEFAULT_WIDTH: i32 = 900;
 const DEFAULT_HEIGHT: i32 = 700;
 const SPLITTER_HIT_TOLERANCE: i32 = 5;
@@ -1936,20 +1942,49 @@ impl LinuxMainWindow {
     }
 
     fn show_about_dialog(&self) {
+        let language = self.language();
+        let title = about_dialog_title_text(language);
         let dialog = gtk::Dialog::builder()
             .transient_for(&self.widgets.window)
             .modal(true)
-            .title(about_dialog_title_text(self.language()))
+            .title(&title)
+            .default_width(ABOUT_DIALOG_DEFAULT_WIDTH)
+            .default_height(ABOUT_DIALOG_DEFAULT_HEIGHT)
             .build();
         apply_dialog_style(&dialog);
-        dialog.add_button(t(self.language(), "OK", "확인"), gtk::ResponseType::Ok);
+        dialog.add_button(t(language, "OK", "확인"), gtk::ResponseType::Ok);
         dialog.set_default_response(gtk::ResponseType::Ok);
-        let label = gtk::Label::new(Some(&about_dialog_version_text()));
-        label.set_xalign(0.0);
-        label.set_wrap(true);
-        dialog.content_area().append(&label);
-        let link = gtk::LinkButton::with_label(ABOUT_LINK_URL, ABOUT_LINK_URL);
+
+        let version_label = gtk::Label::new(Some(&about_version_label_text()));
+        version_label.set_xalign(0.0);
+        dialog.content_area().append(&version_label);
+
+        let text_view = gtk::TextView::new();
+        text_view.set_editable(false);
+        text_view.set_cursor_visible(false);
+        text_view.set_wrap_mode(gtk::WrapMode::WordChar);
+        text_view.set_left_margin(8);
+        text_view.set_right_margin(8);
+        text_view.set_top_margin(8);
+        text_view.set_bottom_margin(8);
+        text_view.buffer().set_text(&about_notice_text(language));
+
+        let scrolled = gtk::ScrolledWindow::builder()
+            .hexpand(true)
+            .vexpand(true)
+            .min_content_width(500)
+            .min_content_height(220)
+            .child(&text_view)
+            .build();
+        dialog.content_area().append(&scrolled);
+
+        let link = gtk::LinkButton::with_label(PROJECT_URL, PROJECT_URL);
         link.set_halign(gtk::Align::Start);
+        let parent_for_link = dialog.clone();
+        link.connect_activate_link(move |_| {
+            open_about_url_from_dialog(&parent_for_link, language);
+            glib::Propagation::Stop
+        });
         dialog.content_area().append(&link);
         let handled = Rc::new(Cell::new(false));
         let handled_for_response = Rc::clone(&handled);
@@ -6084,18 +6119,13 @@ fn workspace_ui_toggle_menu_label(language: UiLanguage, visible: bool) -> &'stat
     }
 }
 
-fn about_dialog_title_text(language: UiLanguage) -> &'static str {
-    t(language, "About j3GridDocker", "j3GridDocker 정보")
-}
-
-fn about_dialog_version_text() -> String {
-    format!("j3GridDocker {}", env!("CARGO_PKG_VERSION"))
+fn about_dialog_title_text(_language: UiLanguage) -> String {
+    about_window_title_text()
 }
 
 #[cfg(test)]
 fn about_dialog_text(language: UiLanguage) -> String {
-    let _ = language;
-    format!("{}\n\n{}", about_dialog_version_text(), ABOUT_LINK_URL)
+    about_notice_text(language)
 }
 
 fn tab_preset_edit_window_title_text(language: UiLanguage) -> &'static str {
@@ -6576,9 +6606,15 @@ mod tests {
             about_dialog_title_text(UiLanguage::English),
             "About j3GridDocker"
         );
+        assert_eq!(
+            about_version_label_text(),
+            format!("j3GridDocker {}", env!("CARGO_PKG_VERSION"))
+        );
         assert!(about_dialog_text(UiLanguage::English).contains("j3GridDocker"));
-        assert!(about_dialog_text(UiLanguage::English).contains(env!("CARGO_PKG_VERSION")));
-        assert!(about_dialog_text(UiLanguage::English).contains("https://github.com/edgarp9"));
+        assert!(about_dialog_text(UiLanguage::English).contains("GPL-3.0-or-later"));
+        assert!(about_dialog_text(UiLanguage::English).contains("LICENSE"));
+        assert!(about_dialog_text(UiLanguage::English).contains("Source Code"));
+        assert!(about_dialog_text(UiLanguage::English).contains(PROJECT_URL));
     }
 
     #[test]
@@ -7351,4 +7387,37 @@ mod tests {
         assert_eq!(preset_program_label(&titled), "Editor");
         assert_eq!(preset_program_label(&untitled), "/usr/bin/editor");
     }
+}
+
+fn open_about_url_from_dialog(parent: &gtk::Dialog, language: UiLanguage) {
+    let parent = parent.clone();
+    gtk::show_uri_full(
+        Some(&parent),
+        PROJECT_URL,
+        0,
+        None::<&gtk::gio::Cancellable>,
+        move |result| {
+            if let Err(error) = result {
+                show_about_url_error_dialog(&parent, language, &error);
+            }
+        },
+    );
+}
+
+fn show_about_url_error_dialog(parent: &gtk::Dialog, language: UiLanguage, error: &glib::Error) {
+    let dialog = gtk::MessageDialog::builder()
+        .transient_for(parent)
+        .modal(true)
+        .message_type(gtk::MessageType::Info)
+        .buttons(gtk::ButtonsType::Ok)
+        .text(t(
+            language,
+            "Could not open the link in a browser.",
+            "브라우저에서 링크를 열 수 없습니다.",
+        ))
+        .secondary_text(error.message())
+        .build();
+    apply_dialog_style(&dialog);
+    dialog.connect_response(|dialog, _| dialog.close());
+    dialog.present();
 }

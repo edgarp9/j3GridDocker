@@ -346,7 +346,7 @@ function Complete-ProgramEditDialog {
 }
 
 function Complete-AboutDialog {
-    $dialog = Wait-Window "" "#32770"
+    $dialog = Wait-Window "" "j3GridDocker.AboutDialog"
     Add-Trace "about dialog hwnd=$dialog windows=$(Get-ProcessWindowSummary $script:AppProcessId)"
     $ok = [J3GridDockerMenuSmoke.Native]::GetDlgItem($dialog, $IdOk)
     if ($ok -ne [IntPtr]::Zero) {
@@ -358,7 +358,7 @@ function Complete-AboutDialog {
         Start-Sleep -Milliseconds 300
     }
     if ([J3GridDockerMenuSmoke.Native]::IsWindow($dialog)) {
-    [J3GridDockerMenuSmoke.Native]::PostMessage($dialog, $WmClose, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null
+        [J3GridDockerMenuSmoke.Native]::PostMessage($dialog, $WmClose, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null
     }
     Wait-WindowClosed $dialog "about dialog"
     Add-Trace "completed About dialog"

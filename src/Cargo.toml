@@ -1,9 +1,11 @@
 [package]
 name = "j3grid-docker"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.93"
 publish = false
+license = "GPL-3.0-or-later"
+repository = "https://github.com/edgarp9"
 build = "build.rs"
 
 [dependencies]
